@@ -64,7 +64,7 @@ print("bbox:", bbox)
 
 # ── Inferens ──
 with torch.no_grad():
-    op = model(
+    op, _ = model(
         input_ids=inputs_ids.unsqueeze(0),
         attention_mask=attention_mask.unsqueeze(0),
         bbox=bbox.unsqueeze(0),

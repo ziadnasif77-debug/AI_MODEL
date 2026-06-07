@@ -51,6 +51,6 @@ class ModelModule(nn.Module):
         print("Sannsynlighetsscore:", prob)
         print("Top sannsynlighet / klasse:", top_p, top_class)
 
-        loss = loss_fn(output, labels)
+        loss = loss_fn(output, labels) if labels is not None else None
 
         return output, loss
