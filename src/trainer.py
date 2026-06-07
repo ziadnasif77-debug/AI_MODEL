@@ -35,7 +35,7 @@ class ModelModule(nn.Module):
             nn.Linear(in_features=512, out_features=n_classes)
         )
 
-    def forward(self, input_ids, attention_mask, bbox, pixel_values, lables=None):
+    def forward(self, input_ids, attention_mask, bbox, pixel_values, labels=None):
         output = self.model(
             input_ids,
             attention_mask=attention_mask,
@@ -51,6 +51,6 @@ class ModelModule(nn.Module):
         print("Sannsynlighetsscore:", prob)
         print("Top sannsynlighet / klasse:", top_p, top_class)
 
-        loss = loss_fn(output, lables)
+        loss = loss_fn(output, labels)
 
         return output, loss
