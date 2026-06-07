@@ -1,0 +1,52 @@
+# Trainer - NAV OCR System
+
+import torch.nn as nn
+import torch
+from transformers import LayoutLMv3ForTokenClassification
+import torch.nn.functional as nnf
+
+# ── NAV Labels ──
+# 0: O (other)
+# 1: NAVN
+# 2: FODSELSNUMMER
+# 3: DATO
+# 4: ADRESSE
+# 5: SIGNATUR
+NUM_CLASSES = 6
+
+MODEL_DIR = r"E:\AI_MODOL\models\layoutlmv3"
+
+
+def loss_fn(pred, target):
+    return nn.CrossEntropyLoss()(pred.view(-1, NUM_CLASSES), target.view(-1))
+
+
+class ModelModule(nn.Module):
+    def __init__(self, n_classes: int) -> None:
+        super().__init__()
+        self.model = LayoutLMv3ForTokenClassification.from_pretrained(MODEL_DIR)
+        self.cls_layer = nn.Sequential(
+            nn.Linear(in_features=2, out_features=512),
+            nn.ReLU(),
+            nn.Linear(in_features=512, out_features=n_classes)
+        )
+
+    def forward(self, input_ids, attention_mask, bbox, pixel_values, lables=None):
+        output = self.model(
+            input_ids,
+            attention_mask=attention_mask,
+            bbox=bbox,
+            pixel_values=pixel_values
+        )
+
+        output = self.cls_layer(output.logits)
+
+        prob = nnf.softmax(output, dim=1)
+        top_p, top_class = prob.topk(1, dim=1)
+
+        print("Sannsynlighetsscore:", prob)
+        print("Top sannsynlighet / klasse:", top_p, top_class)
+
+        loss = loss_fn(output, lables)
+
+        return output, loss

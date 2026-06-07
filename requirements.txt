@@ -1,0 +1,9 @@
+pymupdf
+paddlepaddle-gpu
+paddleocr
+transformers==4.44.0
+torch
+Pillow
+numpy
+tqdm
+matplotlib
