@@ -48,6 +48,7 @@ for json_file in json_files:
             parts = image_name.split('-', 1)
             if len(parts[0]) == 8 and parts[0].isalnum():
                 image_name = parts[1]
+        image_name = image_name.replace('_label_studio.json', '.png')
 
         data_item["file_name"] = os.path.join(OUTPUT_IMAGES_DIR, image_name)
         print(f"  Fil: {image_name}")

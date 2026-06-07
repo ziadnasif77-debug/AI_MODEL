@@ -1,10 +1,15 @@
 # Utils - NAV OCR System
 
+import os
 from paddleocr import PaddleOCR
 import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
+
+# ── Grunnsti ──
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_IMAGES_DIR = os.path.join(BASE_DIR, 'output_images')
 
 # ── NAV Labels ──
 NAV_LABELS = {
@@ -49,7 +54,8 @@ def train_data_format(json_to_dict: list):
         count += 1
         test_dict = {"id": int, "tokens": [], "bboxes": [], "ner_tag": []}
         test_dict["id"]       = count
-        test_dict["img_path"] = item['file_name']
+        img_name = os.path.basename(item['file_name'])
+        test_dict["img_path"] = os.path.join(OUTPUT_IMAGES_DIR, img_name)
 
         for cont in item['annotations']:
             test_dict['tokens'].append(cont['text'])
