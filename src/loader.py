@@ -15,14 +15,9 @@ class dataSet:
         return len(self.json_data)
 
     def __getitem__(self, index) -> dict:
-        imgs   = []
-        words  = []
-        labels = []
-        bboxes = []
-
         data = self.json_data[index]
 
-        imgs.append(Image.open(data['img_path']).convert('RGB'))
+        image = Image.open(data['img_path']).convert('RGB')
 
         # Hent tokens, labels og bboxes
         words  = data.get('tokens',  ["[UNK]"])
@@ -39,13 +34,13 @@ class dataSet:
 
         # Tokenisering og koding
         encoding = self.processor(
-            imgs,
-            words=[words],
-            boxes=[bboxes],
-            word_labels=[labels],
+            image,
+            text=words,
+            boxes=bboxes,
+            word_labels=labels,
             max_length=512,
             padding="max_length",
-            truncation="longest_first",
+            truncation=True,
             return_tensors='pt'
         )
 
