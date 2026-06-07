@@ -7,10 +7,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def convert_bounding_box(x, y, width, height):
-    x1 = x
-    y1 = y
-    x2 = x + width
-    y2 = y + height
+    x1 = int(x * 10)
+    y1 = int(y * 10)
+    x2 = int((x + width) * 10)
+    y2 = int((y + height) * 10)
     return [x1, y1, x2, y2]
 
 
