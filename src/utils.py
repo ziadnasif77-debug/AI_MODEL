@@ -66,9 +66,23 @@ def train_data_format(json_to_dict: list):
 # OCR-motor for inferens
 ocr = PaddleOCR(
     use_angle_cls=False,
-    lang='en',
-    rec=False,
+    lang='latin',
+    use_gpu=False,
 )
+
+
+def fix_norwegian(text):
+    replacements = {
+        'ae': 'æ', 'AE': 'Æ',
+        'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
+        'aa': 'å', 'AA': 'Å',
+        'Fodselsnummer': 'Fødselsnummer',
+        'fodselsnummer': 'fødselsnummer',
+        'Fodselsdato': 'Fødselsdato',
+    }
+    for wrong, correct in replacements.items():
+        text = text.replace(wrong, correct)
+    return text
 
 
 def scale_bounding_box(box: list, width: float, height: float) -> list:
@@ -92,7 +106,7 @@ def dataSetFormat(img_file):
     test_dict['img_path'] = img_file
 
     for item in ress[0]:
-        test_dict['tokens'].append(item[1][0])
+        test_dict['tokens'].append(fix_norwegian(item[1][0]))
         test_dict['bboxes'].append(scale_bounding_box(process_bbox(item[0]), width, height))
 
     return test_dict, width, height

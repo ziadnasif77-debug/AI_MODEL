@@ -11,7 +11,21 @@ import numpy as np
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Initialiser OCR-motor
-ocr = PaddleOCR(use_angle_cls=False, lang='en', use_gpu=False)
+ocr = PaddleOCR(use_angle_cls=False, lang='latin', use_gpu=False)
+
+
+def fix_norwegian(text):
+    replacements = {
+        'ae': 'æ', 'AE': 'Æ',
+        'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
+        'aa': 'å', 'AA': 'Å',
+        'Fodselsnummer': 'Fødselsnummer',
+        'fodselsnummer': 'fødselsnummer',
+        'Fodselsdato': 'Fødselsdato',
+    }
+    for wrong, correct in replacements.items():
+        text = text.replace(wrong, correct)
+    return text
 
 images_folder_path   = os.path.join(BASE_DIR, 'input_images')
 output_images_folder = os.path.join(BASE_DIR, 'output_images')
@@ -61,7 +75,7 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
                 continue
             for item in output:
                 co_ord = item[0]
-                text = item[1][0]
+                text = fix_norwegian(item[1][0])
 
                 four_co_ord = [
                     co_ord[0][0],
