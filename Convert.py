@@ -1,19 +1,22 @@
 import pymupdf  # PyMuPDF
 import os
 
-# Parameters
+# ── Grunnsti ──
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Parametere
 dpi = 300
 zoom = dpi / 72
 magnify = pymupdf.Matrix(zoom, zoom)
 
-# Paths
-input_folder  = r'E:\AI MODOL\Data'
-output_folder = r'E:\AI MODOL\output_images'
+# Stier
+input_folder  = os.path.join(BASE_DIR, 'Data')
+output_folder = os.path.join(BASE_DIR, 'output_images')
 
-# Ensure output directory exists
+# Sikre at utdata-mappen finnes
 os.makedirs(output_folder, exist_ok=True)
 
-# Process each PDF in the data folder
+# Behandle hver PDF i data-mappen
 for pdf_file in os.listdir(input_folder):
     if pdf_file.endswith('.pdf'):
         pdf_path = os.path.join(input_folder, pdf_file)

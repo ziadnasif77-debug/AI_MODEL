@@ -1,5 +1,6 @@
 # Main - NAV OCR System
 
+import os
 import torch
 from transformers import LayoutLMv3FeatureExtractor, LayoutLMv3TokenizerFast, LayoutLMv3Processor, LayoutLMv3ForTokenClassification
 from trainer import *
@@ -7,6 +8,9 @@ from loader import *
 from torch.optim import AdamW
 import numpy as np
 from engine import *
+
+# ── Grunnsti ──
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ── NAV Labels ──
 # 0: O (other)
@@ -17,12 +21,11 @@ from engine import *
 # 5: SIGNATUR
 NUM_CLASSES = 6
 
-# ── Paths ──
-MODEL_DIR     = r"E:\AI_MODOL\models\layoutlmv3"
-TRAINING_JSON = r"E:\AI_MODOL\training_data\Training_layoutLMV3.json"
-OUTPUT_MODEL  = r"E:\AI_MODOL\models\nav_layoutlmv3"
+# ── Stier ──
+MODEL_DIR     = os.path.join(BASE_DIR, 'models', 'layoutlmv3')
+TRAINING_JSON = os.path.join(BASE_DIR, 'training_data', 'Training_layoutLMV3.json')
+OUTPUT_MODEL  = os.path.join(BASE_DIR, 'models', 'nav_layoutlmv3')
 
-import os
 os.makedirs(OUTPUT_MODEL, exist_ok=True)
 
 featur_extractor = LayoutLMv3FeatureExtractor(apply_ocr=False)
@@ -61,7 +64,7 @@ if __name__ == "__main__":
         if train_loss < best_loss:
             torch.save(model.state_dict(), os.path.join(OUTPUT_MODEL, 'model_best.bin'))
             best_loss = train_loss
-            print(f"  ✅ Ny beste modell lagret! Loss: {train_loss:.4f}")
+            print(f"  Ny beste modell lagret! Loss: {train_loss:.4f}")
 
         # Lagre sjekkpunkter hvert 10. epoke
         if epoch % 10 == 0:

@@ -7,12 +7,15 @@ import json
 from uuid import uuid4
 import numpy as np
 
-# Initialize OCR engine
+# ── Grunnsti ──
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Initialiser OCR-motor
 ocr = PaddleOCR(use_angle_cls=False, lang='en', use_gpu=False)
 
-images_folder_path   = r"E:\AI_MODOL\input_images"
-output_images_folder = r"E:\AI_MODOL\output_images"
-output_json_folder   = r"E:\AI_MODOL\output_json"
+images_folder_path   = os.path.join(BASE_DIR, 'input_images')
+output_images_folder = os.path.join(BASE_DIR, 'output_images')
+output_json_folder   = os.path.join(BASE_DIR, 'output_json')
 
 os.makedirs(images_folder_path,   exist_ok=True)
 os.makedirs(output_images_folder, exist_ok=True)
@@ -45,7 +48,6 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
 
         img_path = os.path.join(images_folder_path, image_file)
 
-        # تضمين الصورة كـ Base64
         output_json['data'] = {"ocr": image_to_base64(img_path)}
 
         img = Image.open(img_path)
@@ -93,17 +95,15 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
 
         output_json['predictions'] = [{"result": annotation_result, "score": 0.97}]
 
-        # حفظ JSON
         json_filename = os.path.join(output_json_folder, f'{image_file[:-4]}_label_studio.json')
         with open(json_filename, 'w', encoding='utf-8') as f:
             json.dump(output_json, f, indent=4, ensure_ascii=False)
-        print(f"  ✅ JSON lagret: {json_filename}")
+        print(f"  JSON lagret: {json_filename}")
 
-        # نقل الصورة
         src = os.path.join(images_folder_path, image_file)
         dst = os.path.join(output_images_folder, image_file)
         shutil.move(src, dst)
-        print(f"  ✅ Bilde flyttet til output_images")
+        print(f"  Bilde flyttet til output_images")
 
     print("\n" + "="*50)
     print("Behandling fullfort!")
