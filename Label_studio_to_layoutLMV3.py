@@ -15,23 +15,24 @@ def convert_bounding_box(x, y, width, height):
 
 
 # ── Stier ──
-TRAINING_DATA_DIR = os.path.join(BASE_DIR, 'training_data')
-DONE_DIR          = os.path.join(BASE_DIR, 'training_data', 'trained')
+PENDING_DIR       = os.path.join(BASE_DIR, 'training_data', 'pending')
+TRAINED_DIR       = os.path.join(BASE_DIR, 'training_data', 'trained')
 OUTPUT_JSON       = os.path.join(BASE_DIR, 'training_data', 'Training_layoutLMV3.json')
 OUTPUT_IMAGES_DIR = os.path.join(BASE_DIR, 'output_images')
 
-os.makedirs(DONE_DIR, exist_ok=True)
+os.makedirs(PENDING_DIR, exist_ok=True)
+os.makedirs(TRAINED_DIR, exist_ok=True)
 
-json_files = [f for f in os.listdir(TRAINING_DATA_DIR)
-              if f.endswith('.json') and f != 'Training_layoutLMV3.json']
+json_files = [f for f in os.listdir(PENDING_DIR)
+              if f.endswith('.json')]
 
-print(f"Fant {len(json_files)} JSON-filer i training_data")
+print(f"Fant {len(json_files)} JSON-filer i training_data/pending")
 print("="*50)
 
 output = []
 
 for json_file in json_files:
-    json_path = os.path.join(TRAINING_DATA_DIR, json_file)
+    json_path = os.path.join(PENDING_DIR, json_file)
     print(f"\nLeser: {json_file}")
 
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -99,8 +100,8 @@ for json_file in json_files:
         data_item["annotations"] = ann_list
         output.append(data_item)
 
-    shutil.move(json_path, os.path.join(DONE_DIR, json_file))
-    print(f"  Flyttet til trained")
+    shutil.move(json_path, os.path.join(TRAINED_DIR, json_file))
+    print(f"  Flyttet til training_data/trained")
 
 with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=4, ensure_ascii=False)
