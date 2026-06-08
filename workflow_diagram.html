@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="no" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<title>NAV OCR - Arbeidsflyt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    padding: 30px 10px;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 900px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 1.6em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 0.95em;
+  }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .node {
+    position: relative;
+    border-radius: 12px;
+    padding: 14px 24px;
+    text-align: center;
+    min-width: 280px;
+    max-width: 360px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .node .title {
+    font-weight: 700;
+    font-size: 1.05em;
+    margin-bottom: 4px;
+  }
+  .node .desc {
+    font-size: 0.85em;
+    opacity: 0.85;
+  }
+  .node .path {
+    font-size: 0.75em;
+    opacity: 0.6;
+    margin-top: 3px;
+    font-family: 'Consolas', monospace;
+  }
+
+  .input    { background: #dbeafe; border: 2px solid #3b82f6; color: #1e3a5f; }
+  .ocr      { background: #d1fae5; border: 2px solid #10b981; color: #064e3b; }
+  .label    { background: #fef3c7; border: 2px solid #f59e0b; color: #78350f; }
+  .train    { background: #ede9fe; border: 2px solid #8b5cf6; color: #3b0764; }
+  .infer    { background: #fce7f3; border: 2px solid #ec4899; color: #831843; }
+  .result   { background: #e0f2fe; border: 2px solid #0ea5e9; color: #0c4a6e; }
+  .decision { background: #fff7ed; border: 2px solid #f97316; color: #7c2d12; border-radius: 12px; }
+  .model    { background: #f0fdf4; border: 2px solid #22c55e; color: #14532d; }
+
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 40px;
+    position: relative;
+  }
+  .arrow .line {
+    width: 2px;
+    flex: 1;
+    background: #94a3b8;
+  }
+  .arrow .head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #94a3b8;
+  }
+  .arrow .label-text {
+    position: absolute;
+    right: -80px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75em;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  .arrow .label-left {
+    position: absolute;
+    left: -80px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75em;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .split {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    width: 100%;
+    position: relative;
+    margin-top: 0;
+  }
+  .split::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(50% - 180px);
+    width: 360px;
+    height: 2px;
+    background: #94a3b8;
+  }
+  .branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 340px;
+  }
+  .branch-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #475569;
+    padding: 4px 12px;
+    background: #f1f5f9;
+    border-radius: 20px;
+    margin-bottom: 0;
+  }
+
+  .merge-point {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin-top: 0;
+  }
+  .merge-point::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(50% - 180px);
+    width: 360px;
+    height: 2px;
+    background: #94a3b8;
+  }
+
+  .active-learning-box {
+    position: absolute;
+    right: -40px;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    border: 2px dashed #f97316;
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .active-learning-box span {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.75em;
+    color: #f97316;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8em;
+    color: #475569;
+  }
+  .legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid;
+  }
+
+  .corrections {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid #f97316;
+  }
+  .corrections h3 {
+    color: #f97316;
+    margin-bottom: 10px;
+    font-size: 1em;
+  }
+  .corrections ul {
+    list-style: none;
+    padding: 0;
+  }
+  .corrections li {
+    padding: 4px 0;
+    font-size: 0.88em;
+    color: #334155;
+  }
+  .corrections li::before {
+    content: '⚠ ';
+  }
+  .corrections .old {
+    color: #ef4444;
+    text-decoration: line-through;
+  }
+  .corrections .new {
+    color: #22c55e;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>NAV OCR — Arbeidsflyt</h1>
+  <p class="subtitle">Komplett arbeidsprosess fra dokument til resultater</p>
+
+  <div class="flow">
+
+    <!-- Step 1: Input -->
+    <div class="node input">
+      <div class="title">📄 Nytt dokument</div>
+      <div class="desc">PDF eller bilde legges inn</div>
+      <div class="path">Data/</div>
+    </div>
+
+    <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+    <!-- Step 2: Convert -->
+    <div class="node input">
+      <div class="title">Convert.py</div>
+      <div class="desc">PDF → PNG (kun hvis PDF)</div>
+      <div class="path">Data/ → output_images/</div>
+    </div>
+
+    <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+    <!-- Step 3: OCR -->
+    <div class="node ocr">
+      <div class="title">Create_LMv3_dataset_with_paddleOCR.py</div>
+      <div class="desc">PaddleOCR leser tekst + bbox</div>
+      <div class="path">output_images/ → output_json/</div>
+    </div>
+
+    <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+    <!-- Split into two branches -->
+    <div class="split">
+      <div class="branch">
+        <div class="branch-label">🔍 Direkte bruk</div>
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node infer">
+          <div class="title">Inference.py</div>
+          <div class="desc">Trent modell klassifiserer felt</div>
+          <div class="path">output_images/ + model_best.bin</div>
+        </div>
+
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node result">
+          <div class="title">Resultater</div>
+          <div class="desc">NAVN · FNR · DATO<br>ADRESSE · SIGNATUR</div>
+          <div class="path">inference_results.json</div>
+        </div>
+
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node decision">
+          <div class="title">Riktig?</div>
+          <div class="desc">&gt;90% → OK · &lt;90% → Send til merking</div>
+        </div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-label">🏷️ Nytt treningssett</div>
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node label">
+          <div class="title">Label Studio</div>
+          <div class="desc">Team merker nye data manuelt</div>
+          <div class="path">Importerer fra output_json/</div>
+        </div>
+
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node label">
+          <div class="title">Label_studio_to_layoutLMV3.py</div>
+          <div class="desc">Konverterer til treningsformat</div>
+          <div class="path">training_data/pending/ → Training_layoutLMV3.json</div>
+        </div>
+
+        <div class="arrow"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node train">
+          <div class="title">main.py</div>
+          <div class="desc">Retren modellen (LayoutLMv3)</div>
+          <div class="path">Training_layoutLMV3.json → models/nav_layoutlmv3/</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Merge -->
+    <div class="merge-point">
+      <div class="arrow"><div class="line"></div><div class="head"></div></div>
+    </div>
+
+    <div class="node model">
+      <div class="title">✅ model_best.bin</div>
+      <div class="desc">Forbedret modell → klar for neste runde</div>
+      <div class="path">models/nav_layoutlmv3/model_best.bin</div>
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background:#dbeafe;border-color:#3b82f6"></div> Inndata</div>
+    <div class="legend-item"><div class="legend-color" style="background:#d1fae5;border-color:#10b981"></div> OCR</div>
+    <div class="legend-item"><div class="legend-color" style="background:#fef3c7;border-color:#f59e0b"></div> Merking</div>
+    <div class="legend-item"><div class="legend-color" style="background:#ede9fe;border-color:#8b5cf6"></div> Trening</div>
+    <div class="legend-item"><div class="legend-color" style="background:#fce7f3;border-color:#ec4899"></div> Inferens</div>
+    <div class="legend-item"><div class="legend-color" style="background:#e0f2fe;border-color:#0ea5e9"></div> Resultater</div>
+    <div class="legend-item"><div class="legend-color" style="background:#fff7ed;border-color:#f97316"></div> Beslutning</div>
+    <div class="legend-item"><div class="legend-color" style="background:#f0fdf4;border-color:#22c55e"></div> Modell</div>
+  </div>
+
+  <!-- Corrections -->
+  <div class="corrections">
+    <h3>Rettelser fra den originale diagrammet</h3>
+    <ul>
+      <li>PDF-er legges i <span class="old">input_images/</span> → riktig: <span class="new">Data/</span></li>
+      <li>Convert.py skriver til <span class="new">output_images/</span> (ikke input_images)</li>
+      <li>OCR-skriptet heter <span class="old">Create_LMv3.py</span> → riktig: <span class="new">Create_LMv3_dataset_with_paddleOCR.py</span></li>
+      <li>OCR-resultat går til <span class="new">output_json/</span> (manglet i originalen)</li>
+      <li>Label Studio importerer fra <span class="new">output_json/</span> (manglet i originalen)</li>
+      <li>Label_studio_to_layoutLMV3.py leser fra <span class="new">training_data/pending/</span> og flytter til <span class="new">training_data/trained/</span></li>
+      <li>Inference.py leser bilder fra <span class="new">output_images/</span> direkte (ikke fra OCR)</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
