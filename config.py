@@ -17,7 +17,11 @@ OUTPUT_MODEL_DIR  = os.path.join(BASE_DIR, 'models', 'nav_layoutlmv3')
 
 # ── PaddleOCR ──
 OCR_LANG    = 'latin'
-OCR_USE_GPU = False
+OCR_USE_GPU = True
+OCR_GPU_MEM = 500
+
+# ── Parallellbehandling ──
+NUM_WORKERS = 4
 
 # ── LayoutLMv3 Trening ──
 NUM_CLASSES   = 6
