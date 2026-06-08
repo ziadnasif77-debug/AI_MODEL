@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 from config import PENDING_DIR, TRAINED_DIR, TRAINING_JSON, OUTPUT_IMAGES_DIR
 
 
@@ -120,8 +121,10 @@ for json_file in json_files:
     shutil.move(json_path, os.path.join(TRAINED_DIR, json_file))
     print(f"  Flyttet til training_data/trained")
 
-with open(TRAINING_JSON, 'w', encoding='utf-8') as f:
+tmp_fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(TRAINING_JSON), suffix='.json')
+with os.fdopen(tmp_fd, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=4, ensure_ascii=False)
+os.replace(tmp_path, TRAINING_JSON)
 
 print(f"\n{'='*50}")
 print(f"Nye bilder lagt til:    {new_count}")

@@ -59,9 +59,9 @@ def process_single_image(args):
 
             four_co_ord = [
                 co_ord[0][0],
-                co_ord[1][1],
+                co_ord[0][1],
                 abs(co_ord[2][0] - co_ord[0][0]),
-                abs(co_ord[2][1] - co_ord[1][1])
+                abs(co_ord[2][1] - co_ord[0][1])
             ]
 
             bbox = {

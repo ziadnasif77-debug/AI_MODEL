@@ -9,6 +9,7 @@ import json
 import shutil
 import time
 import base64
+import tempfile
 import numpy as np
 from PIL import Image
 from transformers import (
@@ -111,8 +112,11 @@ def load_history():
 
 
 def save_history(history):
-    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(HISTORY_FILE), suffix='.json')
+    with os.fdopen(tmp_fd, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, HISTORY_FILE)
 
 
 def run_active_learning(image_folder=None, threshold=None):
@@ -184,8 +188,8 @@ def run_active_learning(image_folder=None, threshold=None):
             else:
                 avg_conf = sum(r['confidence'] for r in nav_fields) / len(nav_fields)
 
-            img = Image.open(image_path)
-            img_width, img_height = img.size
+            with Image.open(image_path) as img:
+                img_width, img_height = img.size
 
             if avg_conf >= conf_threshold:
                 approved.append({

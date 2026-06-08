@@ -77,21 +77,32 @@ def infer_single_image(image_path, model, processor):
         output_prob = prob.squeeze().cpu().numpy().max(axis=1)
 
     pred = torch.tensor(predictions)
-    offset_mapping = encoding['offset_mapping']
-    is_subword = np.array(offset_mapping.squeeze().tolist())[:, 0] != 0
+    offset_mapping = encoding['offset_mapping'].squeeze().tolist()
+    input_ids_list = encoding['input_ids'].squeeze().tolist()
 
-    true_predictions = [pred[i].item() for i in range(len(pred)) if not is_subword[i]]
-    true_prob_list = [output_prob[i] for i in range(len(output_prob)) if not is_subword[i]]
-    true_boxes = [bbox.cpu()[i].tolist() for i in range(len(bbox)) if not is_subword[i]]
+    true_predictions = []
+    true_prob_list = []
+    true_boxes = []
     true_tokens = []
     token_idx = 0
+
     for i in range(len(pred)):
-        if not is_subword[i]:
-            if token_idx < len(test_dict['tokens']):
-                true_tokens.append(test_dict['tokens'][token_idx])
-                token_idx += 1
-            else:
-                true_tokens.append("")
+        off = offset_mapping[i]
+        token_id = input_ids_list[i]
+
+        if off == [0, 0]:
+            continue
+        if off[0] != 0:
+            continue
+
+        true_predictions.append(pred[i].item())
+        true_prob_list.append(output_prob[i])
+        true_boxes.append(bbox.cpu()[i].tolist())
+        if token_idx < len(test_dict['tokens']):
+            true_tokens.append(test_dict['tokens'][token_idx])
+            token_idx += 1
+        else:
+            true_tokens.append("")
 
     results = []
     for i in range(len(true_predictions)):
