@@ -35,6 +35,7 @@ VALIDATION_SPLIT        = 0.2
 SAVE_EVERY              = 5
 EARLY_STOPPING_PATIENCE = 5
 DATALOADER_WORKERS      = 2
+RANDOM_SEED             = 42
 
 # ── NAV Labels ──
 NAV_LABELS = {
@@ -65,17 +66,27 @@ NAV_LABEL_COLORS = {
 }
 
 # ── Norsk tekstkorrigering ──
-NORWEGIAN_REPLACEMENTS = {
-    'ae': 'æ', 'AE': 'Æ',
-    'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
-    'aa': 'å', 'AA': 'Å',
+NORWEGIAN_SAFE_WORDS = {
     'Fodselsnummer': 'Fødselsnummer',
     'fodselsnummer': 'fødselsnummer',
     'Fodselsdato': 'Fødselsdato',
+    'fodselsdato': 'fødselsdato',
 }
+
+NORWEGIAN_REPLACEMENTS = {
+    'ae': 'æ', 'AE': 'Æ',
+    'oe': 'ø', 'OE': 'Ø',
+    'aa': 'å', 'AA': 'Å',
+}
+
+_SAFE_EXCEPTIONS = {'michael', 'raphael', 'israel', 'joel', 'noel', 'poet', 'roer', 'aachen', 'baal', 'kraal'}
 
 
 def fix_norwegian(text):
+    for wrong, correct in NORWEGIAN_SAFE_WORDS.items():
+        text = text.replace(wrong, correct)
+    if text.lower() in _SAFE_EXCEPTIONS:
+        return text
     for wrong, correct in NORWEGIAN_REPLACEMENTS.items():
         text = text.replace(wrong, correct)
     return text

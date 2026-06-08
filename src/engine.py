@@ -22,7 +22,7 @@ def train_fn(data_loader, model, optimizer, scheduler=None):
         if scheduler is not None:
             scheduler.step()
         final_loss += loss.item()
-    return final_loss / len(data_loader)
+    return final_loss / max(len(data_loader), 1)
 
 
 def eval_fn(data_loader, model):
@@ -33,4 +33,4 @@ def eval_fn(data_loader, model):
             data = move_to_device(data, DEVICE)
             _, loss = model(**data)
             final_loss += loss.item()
-    return final_loss / len(data_loader)
+    return final_loss / max(len(data_loader), 1)

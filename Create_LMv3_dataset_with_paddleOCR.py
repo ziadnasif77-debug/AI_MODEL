@@ -60,8 +60,8 @@ def process_single_image(args):
             four_co_ord = [
                 co_ord[0][0],
                 co_ord[1][1],
-                co_ord[2][0] - co_ord[0][0],
-                co_ord[2][1] - co_ord[1][1]
+                abs(co_ord[2][0] - co_ord[0][0]),
+                abs(co_ord[2][1] - co_ord[1][1])
             ]
 
             bbox = {
@@ -72,7 +72,7 @@ def process_single_image(args):
                 'rotation': 0
             }
 
-            if not text:
+            if not text or bbox['width'] <= 0 or bbox['height'] <= 0:
                 continue
 
             region_id = str(uuid4())[:10]

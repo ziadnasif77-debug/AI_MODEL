@@ -211,7 +211,7 @@ def run_active_learning(image_folder=None, threshold=None):
                     "avg_confidence": round(avg_conf, 1)
                 })
 
-                ls_json = results_to_label_studio(image_path, nav_fields, img_width, img_height)
+                ls_json = results_to_label_studio(image_path, results, img_width, img_height)
                 review_path = os.path.join(LOW_CONFIDENCE_DIR, f'{image_file[:-4]}_review.json')
                 with open(review_path, 'w', encoding='utf-8') as f:
                     json.dump(ls_json, f, indent=2, ensure_ascii=False)
