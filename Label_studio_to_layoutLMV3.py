@@ -54,11 +54,20 @@ for json_file in json_files:
         data_item["file_name"] = os.path.join(OUTPUT_IMAGES_DIR, image_name)
         print(f"  Fil: {image_name}")
 
+        img_path = data_item["file_name"]
+        if os.path.exists(img_path):
+            from PIL import Image
+            img = Image.open(img_path)
+            data_item["width"], data_item["height"] = img.size
+        else:
+            data_item["width"] = 880
+            data_item["height"] = 700
+
         annotations = task.get('annotations', [])
         if annotations and annotations[0].get('result'):
             first = annotations[0]['result'][0]
-            data_item["width"]  = first.get('original_width', 880)
-            data_item["height"] = first.get('original_height', 700)
+            data_item["width"]  = first.get('original_width', data_item["width"])
+            data_item["height"] = first.get('original_height', data_item["height"])
 
         if annotations:
             results = annotations[0].get('result', [])

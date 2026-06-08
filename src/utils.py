@@ -43,20 +43,25 @@ def train_data_format(json_to_dict: list):
     return final_list
 
 
-# OCR-motor for inferens
-ocr = PaddleOCR(
-    use_angle_cls=False,
-    lang=OCR_LANG,
-    use_gpu=OCR_USE_GPU,
-)
+_ocr = None
+
+def _get_ocr():
+    global _ocr
+    if _ocr is None:
+        _ocr = PaddleOCR(
+            use_angle_cls=False,
+            lang=OCR_LANG,
+            use_gpu=OCR_USE_GPU,
+        )
+    return _ocr
 
 
 def scale_bounding_box(box: list, width: float, height: float) -> list:
     return [
         100 * box[0] / width,
         100 * box[1] / height,
-        (100 * box[0] / width) + box[2],
-        (100 * box[1] / height) + box[3]
+        100 * (box[0] + box[2]) / width,
+        100 * (box[1] + box[3]) / height
     ]
 
 
@@ -66,14 +71,16 @@ def process_bbox(box: list):
 
 def dataSetFormat(img_file):
     width, height = img_file.size
+    ocr = _get_ocr()
     ress = ocr.ocr(np.asarray(img_file))
 
     test_dict = {'tokens': [], "bboxes": []}
     test_dict['img_path'] = img_file
 
-    for item in ress[0]:
-        test_dict['tokens'].append(fix_norwegian(item[1][0]))
-        test_dict['bboxes'].append(scale_bounding_box(process_bbox(item[0]), width, height))
+    if ress and ress[0]:
+        for item in ress[0]:
+            test_dict['tokens'].append(fix_norwegian(item[1][0]))
+            test_dict['bboxes'].append(scale_bounding_box(process_bbox(item[0]), width, height))
 
     return test_dict, width, height
 

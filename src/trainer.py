@@ -19,8 +19,9 @@ class ModelModule(nn.Module):
     def __init__(self, n_classes: int) -> None:
         super().__init__()
         self.model = LayoutLMv3ForTokenClassification.from_pretrained(MODEL_DIR)
+        pretrained_out = self.model.config.num_labels
         self.cls_layer = nn.Sequential(
-            nn.Linear(in_features=2, out_features=512),
+            nn.Linear(in_features=pretrained_out, out_features=512),
             nn.ReLU(),
             nn.Linear(in_features=512, out_features=n_classes)
         )

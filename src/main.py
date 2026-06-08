@@ -18,7 +18,7 @@ from config import (
     MODEL_DIR, TRAINING_JSON, OUTPUT_MODEL_DIR,
     NUM_CLASSES, BATCH_SIZE, LEARNING_RATE, EPOCHS,
     VALIDATION_SPLIT, SAVE_EVERY, EARLY_STOPPING_PATIENCE,
-    DATALOADER_WORKERS
+    DATALOADER_WORKERS, RANDOM_SEED
 )
 
 os.makedirs(OUTPUT_MODEL_DIR, exist_ok=True)
@@ -29,6 +29,9 @@ processor = LayoutLMv3Processor(tokenizer=tokeniser, feature_extractor=featur_ex
 
 
 if __name__ == "__main__":
+    torch.manual_seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
+
     print("=" * 60)
     print("NAV OCR - LayoutLMv3 Treningsprogram")
     print(f"Enhet: {DEVICE}")
@@ -40,7 +43,8 @@ if __name__ == "__main__":
     val_size = max(1, int(total * VALIDATION_SPLIT))
     train_size = total - val_size
 
-    train_ds, val_ds = random_split(full_ds, [train_size, val_size])
+    generator = torch.Generator().manual_seed(RANDOM_SEED)
+    train_ds, val_ds = random_split(full_ds, [train_size, val_size], generator=generator)
 
     print(f"Totalt: {total} bilder | Trening: {train_size} | Validering: {val_size}")
 

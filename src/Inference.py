@@ -20,7 +20,7 @@ from utils import dataSetFormat, plot_img, fix_norwegian
 from engine import DEVICE
 from config import (
     MODEL_DIR, OUTPUT_MODEL_DIR, OUTPUT_IMAGES_DIR,
-    NUM_CLASSES, NAV_LABELS
+    NUM_CLASSES, NAV_LABELS, MAX_LENGTH
 )
 
 
@@ -52,7 +52,7 @@ def infer_single_image(image_path, model, processor):
         test_dict['img_path'].convert('RGB'),
         test_dict['tokens'],
         boxes=test_dict['bboxes'],
-        max_length=256,
+        max_length=MAX_LENGTH,
         padding="max_length",
         truncation=True,
         return_tensors='pt',
@@ -73,10 +73,8 @@ def infer_single_image(image_path, model, processor):
         )
         predictions = op.argmax(-1).squeeze().tolist()
 
-        prob = nnf.softmax(op, dim=1)
-        txt = prob.squeeze().cpu().numpy()
-        txt = txt / np.sum(txt, axis=1).reshape(-1, 1)
-        output_prob = np.max(txt, axis=1)
+        prob = nnf.softmax(op, dim=-1)
+        output_prob = prob.squeeze().cpu().numpy().max(axis=1)
 
     pred = torch.tensor(predictions)
     offset_mapping = encoding['offset_mapping']
@@ -175,6 +173,10 @@ if __name__ == "__main__":
     processor = LayoutLMv3Processor(tokenizer=tokeniser, feature_extractor=featur_extractor)
 
     trained_model_path = os.path.join(OUTPUT_MODEL_DIR, 'model_best.bin')
+    if not os.path.exists(trained_model_path):
+        print(f"FEIL: Ingen trent modell funnet: {trained_model_path}")
+        print("Kjor main.py forst for a trene modellen.")
+        sys.exit(1)
     model = ModelModule(NUM_CLASSES).to(DEVICE)
     model.load_state_dict(torch.load(trained_model_path, map_location=DEVICE))
     model.eval()
