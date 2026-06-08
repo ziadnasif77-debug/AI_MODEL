@@ -5,32 +5,13 @@ from PIL import Image
 import json
 from uuid import uuid4
 import numpy as np
-
-# ── Grunnsti ──
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from config import OUTPUT_IMAGES_DIR, OUTPUT_JSON_DIR, OCR_LANG, OCR_USE_GPU, fix_norwegian
 
 # Initialiser OCR-motor
-ocr = PaddleOCR(use_angle_cls=False, lang='latin', use_gpu=False)
+ocr = PaddleOCR(use_angle_cls=False, lang=OCR_LANG, use_gpu=OCR_USE_GPU)
 
-
-def fix_norwegian(text):
-    replacements = {
-        'ae': 'æ', 'AE': 'Æ',
-        'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
-        'aa': 'å', 'AA': 'Å',
-        'Fodselsnummer': 'Fødselsnummer',
-        'fodselsnummer': 'fødselsnummer',
-        'Fodselsdato': 'Fødselsdato',
-    }
-    for wrong, correct in replacements.items():
-        text = text.replace(wrong, correct)
-    return text
-
-images_folder_path = os.path.join(BASE_DIR, 'output_images')
-output_json_folder = os.path.join(BASE_DIR, 'output_json')
-
-os.makedirs(images_folder_path, exist_ok=True)
-os.makedirs(output_json_folder, exist_ok=True)
+os.makedirs(OUTPUT_IMAGES_DIR, exist_ok=True)
+os.makedirs(OUTPUT_JSON_DIR,   exist_ok=True)
 
 
 def image_to_base64(image_path):
@@ -45,10 +26,10 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
               if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.jpeg')]
 
     if not images:
-        print("Ingen bilder funnet i input_images!")
+        print("Ingen bilder funnet i output_images!")
         return
 
-    print(f"Fant {len(images)} bilder i input_images")
+    print(f"Fant {len(images)} bilder i output_images")
     print("="*50)
 
     for image_file in images:
@@ -106,7 +87,7 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
 
         output_json['predictions'] = [{"result": annotation_result, "score": 0.97}]
 
-        json_filename = os.path.join(output_json_folder, f'{image_file[:-4]}_label_studio.json')
+        json_filename = os.path.join(OUTPUT_JSON_DIR, f'{image_file[:-4]}_label_studio.json')
         with open(json_filename, 'w', encoding='utf-8') as f:
             json.dump(output_json, f, indent=4, ensure_ascii=False)
         print(f"  JSON lagret: {json_filename}")
@@ -115,4 +96,4 @@ def extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path
     print("Behandling fullfort!")
 
 
-extracted_tables_to_label_studio_json_file_with_paddleOCR(images_folder_path)
+extracted_tables_to_label_studio_json_file_with_paddleOCR(OUTPUT_IMAGES_DIR)

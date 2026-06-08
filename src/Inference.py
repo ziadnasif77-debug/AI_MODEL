@@ -1,13 +1,15 @@
 # Inference - NAV OCR System
 
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import torch
 from PIL import Image
 from transformers import (
     LayoutLMv3FeatureExtractor,
     LayoutLMv3TokenizerFast,
     LayoutLMv3Processor,
-    LayoutLMv3ForTokenClassification
 )
 import numpy as np
 import torch.nn.functional as nnf
@@ -15,14 +17,11 @@ from engine import *
 from trainer import *
 from loader import *
 from utils import *
-
-# ── Grunnsti ──
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from config import MODEL_DIR, OUTPUT_MODEL_DIR, OUTPUT_IMAGES_DIR, NUM_CLASSES, NAV_LABELS
 
 # ── Stier ──
-MODEL_DIR       = os.path.join(BASE_DIR, 'models', 'layoutlmv3')
-TRAINED_MODEL   = os.path.join(BASE_DIR, 'models', 'nav_layoutlmv3', 'model_best.bin')
-TEST_IMAGE      = os.path.join(BASE_DIR, 'output_images', 'doc07_kontroll_rapport.png')
+TRAINED_MODEL = os.path.join(OUTPUT_MODEL_DIR, 'model_best.bin')
+TEST_IMAGE    = os.path.join(OUTPUT_IMAGES_DIR, 'doc07_kontroll_rapport.png')
 
 # ── Prosessor ──
 featur_extractor = LayoutLMv3FeatureExtractor(apply_ocr=False)

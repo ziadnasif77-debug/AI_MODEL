@@ -1,24 +1,14 @@
 # Trainer - NAV OCR System
 
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import torch.nn as nn
 import torch
 from transformers import LayoutLMv3ForTokenClassification
 import torch.nn.functional as nnf
-
-# ── Grunnsti ──
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# ── NAV Labels ──
-# 0: O (other)
-# 1: NAVN
-# 2: FODSELSNUMMER
-# 3: DATO
-# 4: ADRESSE
-# 5: SIGNATUR
-NUM_CLASSES = 6
-
-MODEL_DIR = os.path.join(BASE_DIR, 'models', 'layoutlmv3')
+from config import MODEL_DIR, NUM_CLASSES
 
 
 def loss_fn(pred, target):
