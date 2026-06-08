@@ -30,6 +30,12 @@ LEARNING_RATE = 5e-5
 EPOCHS        = 30
 MAX_LENGTH    = 512
 
+# ── Treningskontroll ──
+VALIDATION_SPLIT        = 0.2
+SAVE_EVERY              = 5
+EARLY_STOPPING_PATIENCE = 5
+DATALOADER_WORKERS      = 2
+
 # ── NAV Labels ──
 NAV_LABELS = {
     0: "O",

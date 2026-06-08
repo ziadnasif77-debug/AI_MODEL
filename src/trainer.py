@@ -35,12 +35,6 @@ class ModelModule(nn.Module):
 
         output = self.cls_layer(output.logits)
 
-        prob = nnf.softmax(output, dim=1)
-        top_p, top_class = prob.topk(1, dim=1)
-
-        print("Sannsynlighetsscore:", prob)
-        print("Top sannsynlighet / klasse:", top_p, top_class)
-
         loss = loss_fn(output, labels) if labels is not None else None
 
         return output, loss
