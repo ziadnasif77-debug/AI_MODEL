@@ -1,0 +1,75 @@
+# config.py - NAV OCR Konfigurasjon
+
+import os
+
+# ── Grunnsti (endre denne ved flytting til ny maskin) ──
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ── Mapper ──
+DATA_DIR          = os.path.join(BASE_DIR, 'Data')
+OUTPUT_IMAGES_DIR = os.path.join(BASE_DIR, 'output_images')
+OUTPUT_JSON_DIR   = os.path.join(BASE_DIR, 'output_json')
+PENDING_DIR       = os.path.join(BASE_DIR, 'training_data', 'pending')
+TRAINED_DIR       = os.path.join(BASE_DIR, 'training_data', 'trained')
+TRAINING_JSON     = os.path.join(BASE_DIR, 'training_data', 'Training_layoutLMV3.json')
+MODEL_DIR         = os.path.join(BASE_DIR, 'models', 'layoutlmv3')
+OUTPUT_MODEL_DIR  = os.path.join(BASE_DIR, 'models', 'nav_layoutlmv3')
+
+# ── PaddleOCR ──
+OCR_LANG    = 'latin'
+OCR_USE_GPU = False
+
+# ── LayoutLMv3 Trening ──
+NUM_CLASSES   = 6
+BATCH_SIZE    = 2
+LEARNING_RATE = 5e-5
+EPOCHS        = 30
+MAX_LENGTH    = 512
+
+# ── NAV Labels ──
+NAV_LABELS = {
+    0: "O",
+    1: "NAVN",
+    2: "FODSELSNUMMER",
+    3: "DATO",
+    4: "ADRESSE",
+    5: "SIGNATUR"
+}
+
+NAV_LABEL_MAP = {
+    "O":             0,
+    "NAVN":          1,
+    "FODSELSNUMMER": 2,
+    "DATO":          3,
+    "ADRESSE":       4,
+    "SIGNATUR":      5,
+}
+
+NAV_LABEL_COLORS = {
+    0: "gray",
+    1: "red",
+    2: "cyan",
+    3: "blue",
+    4: "green",
+    5: "yellow"
+}
+
+# ── Norsk tekstkorrigering ──
+NORWEGIAN_REPLACEMENTS = {
+    'ae': 'æ', 'AE': 'Æ',
+    'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
+    'aa': 'å', 'AA': 'Å',
+    'Fodselsnummer': 'Fødselsnummer',
+    'fodselsnummer': 'fødselsnummer',
+    'Fodselsdato': 'Fødselsdato',
+}
+
+
+def fix_norwegian(text):
+    for wrong, correct in NORWEGIAN_REPLACEMENTS.items():
+        text = text.replace(wrong, correct)
+    return text
+
+
+# ── PDF-konvertering ──
+PDF_DPI = 300

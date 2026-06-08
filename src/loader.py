@@ -1,9 +1,14 @@
 # Loader - NAV OCR System
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from utils import *
 import torch
 from tqdm import tqdm
 from PIL import Image
+from config import MAX_LENGTH
 
 
 class dataSet:
@@ -38,7 +43,7 @@ class dataSet:
             text=words,
             boxes=bboxes,
             word_labels=labels,
-            max_length=512,
+            max_length=MAX_LENGTH,
             padding="max_length",
             truncation=True,
             return_tensors='pt'

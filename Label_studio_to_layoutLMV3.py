@@ -1,9 +1,7 @@
 import json
 import os
 import shutil
-
-# ── Grunnsti ──
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from config import PENDING_DIR, TRAINED_DIR, TRAINING_JSON, OUTPUT_IMAGES_DIR
 
 
 def convert_bounding_box(x, y, width, height):
@@ -13,12 +11,6 @@ def convert_bounding_box(x, y, width, height):
     y2 = int((y + height) * 10)
     return [x1, y1, x2, y2]
 
-
-# ── Stier ──
-PENDING_DIR       = os.path.join(BASE_DIR, 'training_data', 'pending')
-TRAINED_DIR       = os.path.join(BASE_DIR, 'training_data', 'trained')
-OUTPUT_JSON       = os.path.join(BASE_DIR, 'training_data', 'Training_layoutLMV3.json')
-OUTPUT_IMAGES_DIR = os.path.join(BASE_DIR, 'output_images')
 
 os.makedirs(PENDING_DIR, exist_ok=True)
 os.makedirs(TRAINED_DIR, exist_ok=True)
@@ -104,9 +96,9 @@ for json_file in json_files:
     shutil.move(json_path, os.path.join(TRAINED_DIR, json_file))
     print(f"  Flyttet til training_data/trained")
 
-with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
+with open(TRAINING_JSON, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=4, ensure_ascii=False)
 
 print(f"\n{'='*50}")
 print(f"Ferdig! {len(output)} bilder konvertert")
-print(f"Lagret til: {OUTPUT_JSON}")
+print(f"Lagret til: {TRAINING_JSON}")

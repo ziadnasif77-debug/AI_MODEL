@@ -1,34 +1,19 @@
 # Utils - NAV OCR System
 
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from paddleocr import PaddleOCR
 import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
-
-# ── Grunnsti ──
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUTPUT_IMAGES_DIR = os.path.join(BASE_DIR, 'output_images')
-
-# ── NAV Labels ──
-NAV_LABELS = {
-    0: "O",
-    1: "NAVN",
-    2: "FODSELSNUMMER",
-    3: "DATO",
-    4: "ADRESSE",
-    5: "SIGNATUR"
-}
-
-NAV_LABEL_COLORS = {
-    0: "gray",
-    1: "red",
-    2: "cyan",
-    3: "blue",
-    4: "green",
-    5: "yellow"
-}
+from config import (
+    OUTPUT_IMAGES_DIR, OCR_LANG, OCR_USE_GPU,
+    NAV_LABELS, NAV_LABEL_MAP, NAV_LABEL_COLORS,
+    fix_norwegian
+)
 
 
 def read_json(json_path: str) -> dict:
@@ -38,16 +23,6 @@ def read_json(json_path: str) -> dict:
 
 
 def train_data_format(json_to_dict: list):
-    # ── NAV Label mapping ──
-    label_map = {
-        "O":              0,
-        "NAVN":           1,
-        "FODSELSNUMMER":  2,
-        "DATO":           3,
-        "ADRESSE":        4,
-        "SIGNATUR":       5,
-    }
-
     final_list = []
     count = 0
     for item in json_to_dict:
@@ -60,9 +35,8 @@ def train_data_format(json_to_dict: list):
         for cont in item['annotations']:
             test_dict['tokens'].append(cont['text'])
             test_dict['bboxes'].append(cont['box'])
-            # Konverter label-streng til tall
             label_str = cont['label']
-            test_dict['ner_tag'].append(label_map.get(label_str, 0))
+            test_dict['ner_tag'].append(NAV_LABEL_MAP.get(label_str, 0))
 
         final_list.append(test_dict)
 
@@ -72,23 +46,9 @@ def train_data_format(json_to_dict: list):
 # OCR-motor for inferens
 ocr = PaddleOCR(
     use_angle_cls=False,
-    lang='latin',
-    use_gpu=False,
+    lang=OCR_LANG,
+    use_gpu=OCR_USE_GPU,
 )
-
-
-def fix_norwegian(text):
-    replacements = {
-        'ae': 'æ', 'AE': 'Æ',
-        'oe': 'ø', 'OE': 'Ø', 'o/': 'ø',
-        'aa': 'å', 'AA': 'Å',
-        'Fodselsnummer': 'Fødselsnummer',
-        'fodselsnummer': 'fødselsnummer',
-        'Fodselsdato': 'Fødselsdato',
-    }
-    for wrong, correct in replacements.items():
-        text = text.replace(wrong, correct)
-    return text
 
 
 def scale_bounding_box(box: list, width: float, height: float) -> list:
