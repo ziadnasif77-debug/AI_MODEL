@@ -58,15 +58,15 @@ def _get_ocr():
 
 def scale_bounding_box(box: list, width: float, height: float) -> list:
     return [
-        100 * box[0] / width,
-        100 * box[1] / height,
-        100 * (box[0] + box[2]) / width,
-        100 * (box[1] + box[3]) / height
+        int(1000 * box[0] / width),
+        int(1000 * box[1] / height),
+        int(1000 * (box[0] + box[2]) / width),
+        int(1000 * (box[1] + box[3]) / height)
     ]
 
 
 def process_bbox(box: list):
-    return [box[0][0], box[1][1], box[2][0] - box[0][0], box[2][1] - box[1][1]]
+    return [box[0][0], box[0][1], abs(box[2][0] - box[0][0]), abs(box[2][1] - box[0][1])]
 
 
 def dataSetFormat(img_file):
@@ -96,17 +96,17 @@ def plot_img(im, bbox_list, label_list, prob_list, width, height):
         label_color = NAV_LABEL_COLORS.get(label_id, "gray")
 
         rect = Rectangle(
-            (item[0] * width / 100, item[1] * height / 100),
-            item[2] - item[0],
-            item[3] - item[1],
+            (item[0] * width / 1000, item[1] * height / 1000),
+            (item[2] - item[0]) * width / 1000,
+            (item[3] - item[1]) * height / 1000,
             linewidth=1,
             edgecolor=label_color,
             facecolor='none'
         )
         ax.add_patch(rect)
         ax.text(
-            item[0] * width / 100,
-            item[1] * height / 100,
+            item[0] * width / 1000,
+            item[1] * height / 1000,
             f"{label_name}",
             bbox={'facecolor': [1, 1, 1], 'alpha': 0.5},
             clip_box=ax.clipbox,

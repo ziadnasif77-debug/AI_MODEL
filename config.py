@@ -83,10 +83,10 @@ _SAFE_EXCEPTIONS = {'michael', 'raphael', 'israel', 'joel', 'noel', 'poet', 'roe
 
 
 def fix_norwegian(text):
-    for wrong, correct in NORWEGIAN_SAFE_WORDS.items():
-        text = text.replace(wrong, correct)
     if text.lower() in _SAFE_EXCEPTIONS:
         return text
+    for wrong, correct in NORWEGIAN_SAFE_WORDS.items():
+        text = text.replace(wrong, correct)
     for wrong, correct in NORWEGIAN_REPLACEMENTS.items():
         text = text.replace(wrong, correct)
     return text

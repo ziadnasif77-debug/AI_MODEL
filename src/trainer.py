@@ -6,36 +6,36 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch.nn as nn
 import torch
-from transformers import LayoutLMv3ForTokenClassification
-import torch.nn.functional as nnf
-from config import MODEL_DIR, NUM_CLASSES
-
-
-def loss_fn(pred, target):
-    return nn.CrossEntropyLoss()(pred.view(-1, NUM_CLASSES), target.view(-1))
+from transformers import LayoutLMv3Model
+from config import MODEL_DIR
 
 
 class ModelModule(nn.Module):
     def __init__(self, n_classes: int) -> None:
         super().__init__()
-        self.model = LayoutLMv3ForTokenClassification.from_pretrained(MODEL_DIR)
-        pretrained_out = self.model.config.num_labels
-        self.cls_layer = nn.Sequential(
-            nn.Linear(in_features=pretrained_out, out_features=512),
+        self.n_classes = n_classes
+        self.model = LayoutLMv3Model.from_pretrained(MODEL_DIR)
+        hidden_size = self.model.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, 512),
             nn.ReLU(),
-            nn.Linear(in_features=512, out_features=n_classes)
+            nn.Linear(512, n_classes)
         )
+        self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, input_ids, attention_mask, bbox, pixel_values, labels=None):
-        output = self.model(
+        outputs = self.model(
             input_ids,
             attention_mask=attention_mask,
             bbox=bbox,
             pixel_values=pixel_values
         )
 
-        output = self.cls_layer(output.logits)
+        logits = self.classifier(outputs.last_hidden_state)
 
-        loss = loss_fn(output, labels) if labels is not None else None
+        loss = None
+        if labels is not None:
+            loss = self.loss_fn(logits.view(-1, self.n_classes), labels.view(-1))
 
-        return output, loss
+        return logits, loss
