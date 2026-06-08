@@ -21,7 +21,16 @@ json_files = [f for f in os.listdir(PENDING_DIR)
 print(f"Fant {len(json_files)} JSON-filer i training_data/pending")
 print("="*50)
 
-output = []
+if os.path.exists(TRAINING_JSON):
+    with open(TRAINING_JSON, 'r', encoding='utf-8') as f:
+        output = json.load(f)
+    print(f"Lastet {len(output)} eksisterende bilder fra Training_layoutLMV3.json")
+else:
+    output = []
+    print("Ingen eksisterende data — starter fra scratch")
+
+existing_files = {item['file_name'] for item in output}
+new_count = 0
 
 for json_file in json_files:
     json_path = os.path.join(PENDING_DIR, json_file)
@@ -91,7 +100,13 @@ for json_file in json_files:
                     print(f"    {label}: {text}")
 
         data_item["annotations"] = ann_list
+
+        if data_item["file_name"] in existing_files:
+            print(f"  Finnes allerede — oppdaterer")
+            output = [item for item in output if item['file_name'] != data_item['file_name']]
+
         output.append(data_item)
+        new_count += 1
 
     shutil.move(json_path, os.path.join(TRAINED_DIR, json_file))
     print(f"  Flyttet til training_data/trained")
@@ -100,5 +115,6 @@ with open(TRAINING_JSON, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=4, ensure_ascii=False)
 
 print(f"\n{'='*50}")
-print(f"Ferdig! {len(output)} bilder konvertert")
+print(f"Nye bilder lagt til:    {new_count}")
+print(f"Totalt i treningsdata:  {len(output)}")
 print(f"Lagret til: {TRAINING_JSON}")
